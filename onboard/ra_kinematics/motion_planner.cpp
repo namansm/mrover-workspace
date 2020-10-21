@@ -1,5 +1,7 @@
 #include "motion_planner.hpp"
 #include <random>
+#include <deque>
+
 
 MotionPlanner::MotionPlanner(ArmState robot_state_in, lcm::LCM& lcm_in, KinematicsSolver solver_in) :
         robot(robot_state_in),
@@ -30,14 +32,72 @@ MotionPlanner::MotionPlanner(ArmState robot_state_in, lcm::LCM& lcm_in, Kinemati
 
 vector<double> MotionPlanner::sample() {
 
-  vector<double> z_rand;
+    vector<double> z_rand;
 
-  for (int i = 0; i < all_limits.size(); ++i) {
-    std::uniform_real_distribution<double> distr(all_limits[i]["lower"], all_limits[i]["upper"]);
-    std::default_random_engine eng;
+    for (int i = 0; i < all_limits.size(); ++i) {
+        std::uniform_real_distribution<double> distr(all_limits[i]["lower"], all_limits[i]["upper"]);
+        std::default_random_engine eng;
 
-    z_rand.push_back(distr(eng));
-  }
+        z_rand.push_back(distr(eng));
+    }
 
-  return z_rand;
+    return z_rand;
+}
+
+MotionPlanner::Node* MotionPlanner::nearest(MotionPlanner::Node* tree_root, Vector6d rand) {
+
+    deque<Node*> q;
+    q.push_back(tree_root);
+
+    double min_dist = numeric_limits<double>::max();
+    Node* min_node = nullptr;
+
+    while (!q.empty()) {
+        Node* node = q.front();
+        q.pop_front();
+
+        double dist = (node->config - rand).norm();
+
+        if (dist < min_dist) {
+          min_dist = dist;
+          min_node = node;
+        }
+
+        for (Node* child : node->children) {
+          q.push_back(child);
+        }
+    }
+
+    return min_node;
+}
+
+
+Vector6d MotionPlanner::steer(MotionPlanner::Node* start, Vector6d end) {
+    Vector6d line_vec = end - start->config;
+
+    for (int i = 0; i < step_limits.size(); ++i) {
+        if (step_limits[i] - abs(line_vec(i)) >= 0) {
+            return end;
+        }
+    }
+
+    double min_t = numeric_limits<double>::max();
+
+    Vector6d new_config = start->config;
+
+    //parametrize the line
+    for (int i = 0; i < line_vec.size(); ++i) {
+      
+        // TODO can line_vec[i] be 0?
+        double t = step_limits[i] / abs(line_vec[i]);
+        if (t < min_t) {
+            min_t = t;
+        }
+    }
+
+    for (int i = 0; i < line_vec.size(); ++i) {
+        new_config(i) += min_t * line_vec[i];
+    }
+
+    return new_config;
 }
