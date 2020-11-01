@@ -82,7 +82,7 @@ class MRoverArm:
     def target_orientation_callback(self, channel, msg):
         print("target orientation callback")
         point_msg = TargetOrientation.decode(msg)
-        self.enable_execute = False
+        self.enable_execute = False     
         logger.info('Got a target point.')
 
         print("alpha beta gamma")
@@ -209,7 +209,7 @@ class MRoverArm:
                 print("printing")
                 self.lcm_.publish('/ik_ra_control', arm_position.encode())
 
-    async def execute_spline(self):
+async def execute_spline(self):
         logger.info('Executing path on arm')
         self.spline_t = 0
         while True:
