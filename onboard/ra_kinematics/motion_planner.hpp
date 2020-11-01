@@ -36,9 +36,8 @@ private:
 
     lcm::LCM& lcm;
 
-    // Should Node be outside the MotionPlanner class
     class Node {
-    friend class MotionPlanner;
+        friend class MotionPlanner;
     private:
         Vector6d config;
         
@@ -47,15 +46,18 @@ private:
         double cost;
 
     public:
-        Node(vector<double> config_in) : config(config_in), cost(0) { }
+        Node(Vector6d config_in) : config(config_in), cost(0) { }
     }; // Node class
+
+    Node* start_root;
+    Node* goal_root;
 
 public:
 
     
-    MotionPlanner(ArmState robot_state_in, lcm::LCM& lcm_in, KinematicsSolver solver_in);
+    MotionPlanner(ArmState& robot_state_in, lcm::LCM& lcm_in, KinematicsSolver& solver_in);
 
-    tk::spline rrt_connect(vector<double> target);
+    vector<tk::spline> rrt_connect(Vector6d& target);
 
 
 private:
@@ -63,26 +65,30 @@ private:
     /**
      * Generate a random config based on the joint limits
      * */
-    vector<double> sample();
+    Vector6d sample();
 
     /**
      * Find nearest node in tree to a given random node in config space
      * */
-    Node* nearest(Node* tree_root, Vector6d rand);
+    Node* nearest(Node* tree_root, Vector6d& rand);
 
-    Vector6d steer(Node* start, Vector6d end);
+    Vector6d steer(Node* start, Vector6d& end);
 
-    vector<double> backtrace_path(Node* end, Node* root);
+    vector<Vector6d> backtrace_path(Node* end, Node* root);
 
-    Node* extend(Node* tree, Node* z_rand);
+    Vector6d get_radians(Vector6d& config);
 
-    Node* connect(Node* tree, Node* a_new);
+    Node* extend(Node* tree, Vector6d& z_rand);
 
-    tk::spline spline_fitting(vector<double> path);
+    Node* connect(Node* tree, Vector6d& a_new);
 
+    vector<tk::spline> spline_fitting(vector<Vector6d>& path);
 
     Node* root;
 
+    void inc_i(){
+        ++i;
+    }
 };
 
 
