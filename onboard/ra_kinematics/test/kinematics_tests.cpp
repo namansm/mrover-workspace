@@ -1,9 +1,14 @@
 #include "unit_test_framework.h"
 #include "../json.hpp"
 #include "../arm_state.hpp"
+#include "../utils.hpp"
 #include "../kinematics.hpp"
 
 #include <iostream>
+#include <string>
+
+using namespace nlohmann;
+using namespace std;
 
 /* 
 Here are some varius tests we can use to test kinematics.cpp once it is written (using 2019 configuration):
@@ -29,16 +34,21 @@ NOTE: For more testing points, see valid_configurations_2.csv located towards th
 
 
 TEST(initialization_test) {
-    json geom;
+    string config_path = getenv("MROVER_CONFIG");
+    string geom_file = config_path + "/config_kinematics/mrover_arm_geom.json";
+    json geom = read_json_from_file(geom_file);
     ArmState arm = ArmState(geom);
-    KinematicsSolver solver = KinematicsSolver(arm);
+    KinematicsSolver solver(arm);
 }
 
 TEST(fk_test) {
     // Create the arm to be tested on:
-    json geom;
-    ArmState arm = ArmState(geom);
-    KinematicsSolver solver = KinematicsSolver(arm);
+    // string config_path = getenv("MROVER_CONFIG");
+    // string geom_file = config_path + "/config_kinematics/mrover_arm_geom.json";
+
+    // json geom = read_json_from_file(geom_file);
+    // ArmState arm = ArmState(geom);
+    // KinematicsSolver solver = KinematicsSolver(arm);
     
 }
 
