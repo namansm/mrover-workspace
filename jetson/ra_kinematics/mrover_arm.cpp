@@ -223,8 +223,8 @@ void MRoverArm::plan_path(Vector6d goal){
  
    //idk this data type
 //    vector<tk::spline> path_spline =   this was the beginning of the line below but rrtconnect is void
-   motion_planner.rrt_connect(state, goal); //rrt_connect will be returning bool once cam fixes
-   if(!path_spline.empty()){
+   bool success = motion_planner.rrt_connect(state, goal); //rrt_connect will be returning bool once cam fixes
+   if(success){
        cout << "planned path" << endl;
    }
    else{
