@@ -223,9 +223,9 @@ void MRoverArm::plan_path(Vector6d goal){
  
    //idk this data type
 //    vector<tk::spline> path_spline =   this was the beginning of the line below but rrtconnect is void
-   motion_planner.rrt_connect(goal); //is rrt_connect a void function
+   motion_planner.rrt_connect(state, goal); //is rrt_connect a void function
    if(!path_spline.empty()){
-       spline_t = 0;
+       //spline_t = 0;
        cout << "planned path" << endl;
    }
    else{
